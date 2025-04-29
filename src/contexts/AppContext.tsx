@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, Location, Report, StatusType, CreateUserData } from "@/types";
 import { mockUsers, mockLocations, mockReports } from "@/utils/mockData";
@@ -130,8 +129,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // Simulate API request
       await new Promise(resolve => setTimeout(resolve, 500));
       
+      // Get the mock users array with their passwords
+      // Type cast mockUsers to MockUser[] since we know they might have passwords
+      const mockUsersWithPasswords = mockUsers as MockUser[];
+      
       // For demo, check both email and password
-      const mockUserWithPassword = mockUsers.find(u => u.email.toLowerCase() === email.toLowerCase() && 'password' in u && u.password === password);
+      const mockUserWithPassword = mockUsersWithPasswords.find(
+        u => u.email.toLowerCase() === email.toLowerCase() && 
+        u.password !== undefined && 
+        u.password === password
+      );
       
       // Check the test users we added
       if (email === "wh135@whies.com" && password === "sembarangsaja") {
@@ -177,7 +184,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       
       if (mockUserWithPassword) {
-        const { password: _, ...userWithoutPassword } = mockUserWithPassword;
+        // Create a new object without the password property
+        // We use type assertion to tell TypeScript this object has a password
+        const userWithPassword = mockUserWithPassword as MockUser;
+        // Use object destructuring to remove the password
+        const { password: _, ...userWithoutPassword } = userWithPassword;
+        
         setCurrentUser(userWithoutPassword);
         localStorage.setItem("currentUser", JSON.stringify(userWithoutPassword));
         toast({
