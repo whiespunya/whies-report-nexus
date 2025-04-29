@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, Location, Report, StatusType, CreateUserData } from "@/types";
 import { mockUsers, mockLocations, mockReports } from "@/utils/mockData";
@@ -71,7 +72,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     // Simulate API loading
     const timer = setTimeout(() => {
-      // Add the requested test users to the mock data
+      // Add the requested test users to the mock data with passwords
       const testUsers: MockUser[] = [
         ...mockUsers,
         {
@@ -83,7 +84,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           role: "admin" as const,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          password: "sembarangsaja" // This is just for the mock data, in real app this would be hashed
+          password: "sembarangsaja" // For test login
         },
         {
           id: "test-tech-id",
@@ -94,7 +95,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           role: "technician" as const,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          password: "whies2025" // This is just for the mock data, in real app this would be hashed
+          password: "whies2025" // For test login
         }
       ];
       
