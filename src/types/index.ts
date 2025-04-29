@@ -10,6 +10,16 @@ export interface User {
   updatedAt: string;
 }
 
+// Create a new interface for creating users that includes the password
+export interface CreateUserData {
+  email: string;
+  name: string;
+  fullName: string;
+  badgeNumber: string;
+  role: 'admin' | 'technician';
+  password: string;
+}
+
 export interface Location {
   id: string;
   name: string;

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAppContext } from "@/contexts/AppContext";
 import { User } from "@/types";
@@ -138,15 +137,8 @@ const Users = () => {
   
   // Handler for adding a new user
   const handleAddUser = async (data: UserFormValues) => {
-    // All required fields are guaranteed to be present due to Zod validation
-    await addUser({
-      name: data.name,
-      fullName: data.fullName,
-      email: data.email,
-      badgeNumber: data.badgeNumber,
-      role: data.role,
-      password: data.password
-    });
+    // Using the data directly as it now matches what addUser expects with password
+    await addUser(data);
     setIsAddDialogOpen(false);
     addForm.reset();
   };
