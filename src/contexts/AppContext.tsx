@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { User, Location, Report, StatusType } from "@/types";
+import { User, Location, Report, StatusType, CreateUserData } from "@/types";
 import { mockUsers, mockLocations, mockReports } from "@/utils/mockData";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -13,7 +13,7 @@ interface AppContextType {
   
   // Users
   users: User[];
-  addUser: (user: Omit<User, "id" | "createdAt" | "updatedAt">) => Promise<User>;
+  addUser: (user: CreateUserData) => Promise<User>;
   updateUser: (id: string, userData: Partial<User>) => Promise<User>;
   deleteUser: (id: string) => Promise<boolean>;
   
@@ -67,7 +67,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     // Simulate API loading
     const timer = setTimeout(() => {
-      setUsers(mockUsers);
+      // Add the requested test users to the mock data
+      const testUsers = [
+        ...mockUsers,
+        {
+          id: "test-admin-id",
+          email: "wh135@whies.com",
+          name: "wh135",
+          fullName: "Admin User",
+          badgeNumber: "A001",
+          role: "admin" as const,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          password: "sembarangsaja" // This is just for the mock data, in real app this would be hashed
+        },
+        {
+          id: "test-tech-id",
+          email: "hendra@whies.com",
+          name: "hendra",
+          fullName: "Hendra Abdi",
+          badgeNumber: "T001",
+          role: "technician" as const,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          password: "whies2025" // This is just for the mock data, in real app this would be hashed
+        }
+      ];
+      
+      // Filter out password field for User objects
+      const usersWithoutPasswords = testUsers.map(({ password, ...user }) => user);
+      
+      setUsers(usersWithoutPasswords);
       setLocations(mockLocations);
       setReports(mockReports);
       setIsLoading(false);
@@ -95,8 +125,51 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // Simulate API request
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // For demo, simple email check (in real app, would check password too)
-      const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+      // For demo, check both email and password
+      const user = mockUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+      
+      // Check the test users we added
+      if (email === "wh135@whies.com" && password === "sembarangsaja") {
+        const adminUser = {
+          id: "test-admin-id",
+          email: "wh135@whies.com",
+          name: "wh135",
+          fullName: "Admin User",
+          badgeNumber: "A001",
+          role: "admin" as const,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        setCurrentUser(adminUser);
+        localStorage.setItem("currentUser", JSON.stringify(adminUser));
+        toast({
+          title: "Login successful",
+          description: `Welcome back, ${adminUser.fullName}`,
+        });
+        setIsLoading(false);
+        return true;
+      }
+      
+      if (email === "hendra@whies.com" && password === "whies2025") {
+        const techUser = {
+          id: "test-tech-id",
+          email: "hendra@whies.com",
+          name: "hendra",
+          fullName: "Hendra Abdi",
+          badgeNumber: "T001",
+          role: "technician" as const,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        setCurrentUser(techUser);
+        localStorage.setItem("currentUser", JSON.stringify(techUser));
+        toast({
+          title: "Login successful",
+          description: `Welcome back, ${techUser.fullName}`,
+        });
+        setIsLoading(false);
+        return true;
+      }
       
       if (user) {
         setCurrentUser(user);
@@ -138,14 +211,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // User management methods
-  const addUser = async (userData: Omit<User, "id" | "createdAt" | "updatedAt">): Promise<User> => {
+  const addUser = async (userData: CreateUserData): Promise<User> => {
     setIsLoading(true);
     try {
       // Simulate API request
       await new Promise(resolve => setTimeout(resolve, 500));
       
+      const { password, ...userWithoutPassword } = userData;
+      
       const newUser: User = {
-        ...userData,
+        ...userWithoutPassword,
         id: Math.random().toString(36).substring(2, 15),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

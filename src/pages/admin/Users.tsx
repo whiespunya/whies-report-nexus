@@ -1,6 +1,7 @@
+
 import { useState } from "react";
 import { useAppContext } from "@/contexts/AppContext";
-import { User } from "@/types";
+import { User, CreateUserData } from "@/types";
 import { Button } from "@/components/ui/button";
 import { 
   Dialog, 
@@ -137,8 +138,17 @@ const Users = () => {
   
   // Handler for adding a new user
   const handleAddUser = async (data: UserFormValues) => {
-    // Using the data directly as it now matches what addUser expects with password
-    await addUser(data);
+    // Create a variable that is guaranteed to have all required fields
+    const newUserData: CreateUserData = {
+      name: data.name,
+      fullName: data.fullName,
+      email: data.email,
+      badgeNumber: data.badgeNumber,
+      role: data.role,
+      password: data.password
+    };
+    
+    await addUser(newUserData);
     setIsAddDialogOpen(false);
     addForm.reset();
   };
