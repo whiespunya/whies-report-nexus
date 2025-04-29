@@ -36,8 +36,6 @@ const reportFormSchema = z.object({
   cardNumber: z.string().min(1, "Card Number is required"),
   description: z.string().min(1, "Description is required"),
   notes: z.string().optional(),
-  // In a real app, you would handle image uploads differently
-  images: z.any().optional(),
 });
 
 type ReportFormValues = z.infer<typeof reportFormSchema>;
@@ -47,6 +45,7 @@ const SubmitReport = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [imageFiles, setImageFiles] = useState<FileList | null>(null);
   
   const form = useForm<ReportFormValues>({
     resolver: zodResolver(reportFormSchema),
@@ -57,7 +56,6 @@ const SubmitReport = () => {
       cardNumber: "",
       description: "",
       notes: "",
-      images: null,
     },
   });
   
@@ -96,11 +94,14 @@ const SubmitReport = () => {
   
   // Handle image selection (simplified for demo)
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      // In a real app, you would upload these files to a server
-      // For this demo, we'll use the placeholder image
-      const imageCount = e.target.files.length;
-      setSelectedImages(Array(imageCount).fill("/placeholder.svg"));
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      // Save the files to state
+      setImageFiles(files);
+      
+      // Create image previews
+      const newImages = Array.from(files).map(() => "/placeholder.svg");
+      setSelectedImages(newImages);
     }
   };
   
@@ -244,48 +245,37 @@ const SubmitReport = () => {
                 )}
               />
               
-              <FormField
-                control={form.control}
-                name="images"
-                render={({ field: { onChange, ...field } }) => (
-                  <FormItem>
-                    <FormLabel>Images (Optional)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        onChange={(e) => {
-                          handleImageChange(e);
-                          onChange(e.target.files);
-                        }}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Upload images related to the service or issue (Max: 5MB each)
-                    </FormDescription>
-                    <FormMessage />
-                    
-                    {selectedImages.length > 0 && (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
-                        {selectedImages.map((src, index) => (
-                          <div
-                            key={index}
-                            className="aspect-square rounded-md overflow-hidden bg-gray-100"
-                          >
-                            <img
-                              src={src}
-                              alt={`Selected image ${index + 1}`}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        ))}
+              <div className="space-y-2">
+                <FormLabel htmlFor="images">Images (Optional)</FormLabel>
+                <Input
+                  id="images"
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  // Don't use value here as it causes the error
+                />
+                <FormDescription>
+                  Upload images related to the service or issue (Max: 5MB each)
+                </FormDescription>
+                
+                {selectedImages.length > 0 && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
+                    {selectedImages.map((src, index) => (
+                      <div
+                        key={index}
+                        className="aspect-square rounded-md overflow-hidden bg-gray-100"
+                      >
+                        <img
+                          src={src}
+                          alt={`Selected image ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
-                    )}
-                  </FormItem>
+                    ))}
+                  </div>
                 )}
-              />
+              </div>
               
               <div className="flex justify-end space-x-2">
                 <Button
