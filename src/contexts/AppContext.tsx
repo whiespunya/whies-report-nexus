@@ -40,6 +40,11 @@ interface AppContextType {
   isLoading: boolean;
 }
 
+// Define a type for mock users that includes password
+interface MockUser extends User {
+  password?: string;
+}
+
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const useAppContext = () => {
@@ -68,7 +73,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Simulate API loading
     const timer = setTimeout(() => {
       // Add the requested test users to the mock data
-      const testUsers = [
+      const testUsers: MockUser[] = [
         ...mockUsers,
         {
           id: "test-admin-id",
@@ -126,17 +131,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       await new Promise(resolve => setTimeout(resolve, 500));
       
       // For demo, check both email and password
-      const user = mockUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+      const mockUserWithPassword = mockUsers.find(u => u.email.toLowerCase() === email.toLowerCase() && 'password' in u && u.password === password);
       
       // Check the test users we added
       if (email === "wh135@whies.com" && password === "sembarangsaja") {
-        const adminUser = {
+        const adminUser: User = {
           id: "test-admin-id",
           email: "wh135@whies.com",
           name: "wh135",
           fullName: "Admin User",
           badgeNumber: "A001",
-          role: "admin" as const,
+          role: "admin",
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };
@@ -151,13 +156,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       
       if (email === "hendra@whies.com" && password === "whies2025") {
-        const techUser = {
+        const techUser: User = {
           id: "test-tech-id",
           email: "hendra@whies.com",
           name: "hendra",
           fullName: "Hendra Abdi",
           badgeNumber: "T001",
-          role: "technician" as const,
+          role: "technician",
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };
@@ -171,12 +176,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return true;
       }
       
-      if (user) {
-        setCurrentUser(user);
-        localStorage.setItem("currentUser", JSON.stringify(user));
+      if (mockUserWithPassword) {
+        const { password: _, ...userWithoutPassword } = mockUserWithPassword;
+        setCurrentUser(userWithoutPassword);
+        localStorage.setItem("currentUser", JSON.stringify(userWithoutPassword));
         toast({
           title: "Login successful",
-          description: `Welcome back, ${user.fullName}`,
+          description: `Welcome back, ${userWithoutPassword.fullName}`,
         });
         setIsLoading(false);
         return true;
