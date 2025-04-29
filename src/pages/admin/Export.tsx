@@ -143,7 +143,7 @@ const Export = () => {
                   <SelectValue placeholder="Select Unit ID" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Units</SelectItem>
+                  <SelectItem value="all">All Units</SelectItem>
                   {uniqueUnitIds.map((unitId) => (
                     <SelectItem key={unitId} value={unitId}>
                       {unitId}
