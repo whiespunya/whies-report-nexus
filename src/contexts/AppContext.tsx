@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, Location, Report, StatusType, CreateUserData } from "@/types";
 import { mockUsers, mockLocations, mockReports } from "@/utils/mockData";
@@ -72,37 +71,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     // Simulate API loading
     const timer = setTimeout(() => {
-      // Add the requested test users to the mock data with passwords
-      const testUsers: MockUser[] = [
-        ...mockUsers,
-        {
-          id: "test-admin-id",
-          email: "wh135@whies.com",
-          name: "wh135",
-          fullName: "Admin User",
-          badgeNumber: "A001",
-          role: "admin" as const,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          password: "sembarangsaja" // For test login
-        },
-        {
-          id: "test-tech-id",
-          email: "hendra@whies.com",
-          name: "hendra",
-          fullName: "Hendra Abdi",
-          badgeNumber: "T001",
-          role: "technician" as const,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          password: "whies2025" // For test login
-        }
-      ];
-      
-      // Filter out password field for User objects
-      const usersWithoutPasswords = testUsers.map(({ password, ...user }) => user);
-      
-      setUsers(usersWithoutPasswords);
+      setUsers(mockUsers);
       setLocations(mockLocations);
       setReports(mockReports);
       setIsLoading(false);
@@ -130,20 +99,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // Simulate API request
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Get the mock users array with their passwords
-      // Type cast mockUsers to MockUser[] since we know they might have passwords
-      const mockUsersWithPasswords = mockUsers as MockUser[];
-      
-      // For demo, check both email and password
-      const mockUserWithPassword = mockUsersWithPasswords.find(
-        u => u.email.toLowerCase() === email.toLowerCase() && 
-        u.password !== undefined && 
-        u.password === password
-      );
-      
-      // Check the test users we added
+      // Check for admin test account
       if (email === "wh135@whies.com" && password === "sembarangsaja") {
-        const adminUser: User = {
+        const adminUser: User = mockUsers.find(u => u.id === "test-admin-id") || {
           id: "test-admin-id",
           email: "wh135@whies.com",
           name: "wh135",
@@ -153,6 +111,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };
+        
         setCurrentUser(adminUser);
         localStorage.setItem("currentUser", JSON.stringify(adminUser));
         toast({
@@ -163,8 +122,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return true;
       }
       
+      // Check for technician test account
       if (email === "hendra@whies.com" && password === "whies2025") {
-        const techUser: User = {
+        const techUser: User = mockUsers.find(u => u.id === "test-tech-id") || {
           id: "test-tech-id",
           email: "hendra@whies.com",
           name: "hendra",
@@ -174,6 +134,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };
+        
         setCurrentUser(techUser);
         localStorage.setItem("currentUser", JSON.stringify(techUser));
         toast({
@@ -184,30 +145,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return true;
       }
       
-      if (mockUserWithPassword) {
-        // Create a new object without the password property
-        // We use type assertion to tell TypeScript this object has a password
-        const userWithPassword = mockUserWithPassword as MockUser;
-        // Use object destructuring to remove the password
-        const { password: _, ...userWithoutPassword } = userWithPassword;
-        
-        setCurrentUser(userWithoutPassword);
-        localStorage.setItem("currentUser", JSON.stringify(userWithoutPassword));
-        toast({
-          title: "Login successful",
-          description: `Welcome back, ${userWithoutPassword.fullName}`,
-        });
-        setIsLoading(false);
-        return true;
-      } else {
-        toast({
-          title: "Login failed",
-          description: "Invalid email or password",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return false;
-      }
+      // If no matching credentials found
+      toast({
+        title: "Login failed",
+        description: "Invalid email or password",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return false;
     } catch (error) {
       console.error("Login error:", error);
       toast({

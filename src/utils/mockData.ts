@@ -4,7 +4,7 @@ import { User, Location, Report } from "@/types";
 // Generate a random ID
 const generateId = () => Math.random().toString(36).substring(2, 15);
 
-// Mock Users with just the test users for login
+// Mock Users with test users for login (avoiding duplicates)
 export const mockUsers: User[] = [
   {
     id: "test-admin-id",

@@ -13,7 +13,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const { login } = useAppContext();
+  const { login, currentUser } = useAppContext();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,7 +24,13 @@ const Login = () => {
     try {
       const success = await login(email, password);
       if (success) {
-        // Navigation will be handled by PublicRoute
+        // Force navigation based on role after successful login
+        const userRole = currentUser?.role || (email === "wh135@whies.com" ? "admin" : "technician");
+        if (userRole === "admin") {
+          navigate(ROUTES.DASHBOARD, { replace: true });
+        } else {
+          navigate(ROUTES.TECHNICIAN_DASHBOARD, { replace: true });
+        }
       } else {
         setError("Invalid email or password");
       }

@@ -50,7 +50,12 @@ export const PublicRoute = () => {
   const { isAuthenticated, currentUser } = useAppContext();
 
   if (isAuthenticated) {
-    return <Navigate to={currentUser?.role === "admin" ? ROUTES.DASHBOARD : ROUTES.TECHNICIAN_DASHBOARD} replace />;
+    // Force direct navigation instead of relying on child component
+    if (currentUser?.role === "admin") {
+      return <Navigate to={ROUTES.DASHBOARD} replace />;
+    } else {
+      return <Navigate to={ROUTES.TECHNICIAN_DASHBOARD} replace />;
+    }
   }
 
   return <Outlet />;
