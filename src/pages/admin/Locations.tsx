@@ -95,7 +95,11 @@ const Locations = () => {
   
   // Handler for adding a new location
   const handleAddLocation = async (data: LocationFormValues) => {
-    await addLocation(data);
+    // The name property is always defined here because of the Zod schema
+    await addLocation({
+      name: data.name, // This is required by the type
+      description: data.description // This is optional
+    });
     setIsAddDialogOpen(false);
     addForm.reset();
   };
@@ -113,7 +117,11 @@ const Locations = () => {
   // Handler for submitting edits
   const handleEditLocation = async (data: LocationFormValues) => {
     if (selectedLocation) {
-      await updateLocation(selectedLocation.id, data);
+      // The name property is always defined here because of the Zod schema
+      await updateLocation(selectedLocation.id, {
+        name: data.name, // This is required
+        description: data.description // This is optional
+      });
       setIsEditDialogOpen(false);
       setSelectedLocation(null);
     }

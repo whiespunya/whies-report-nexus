@@ -59,6 +59,15 @@ const userFormSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
+// Define schema for edit form (without password)
+const userEditFormSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  fullName: z.string().min(2, "Full name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  badgeNumber: z.string().min(1, "Badge number is required"),
+  role: z.enum(["admin", "technician"]),
+});
+
 // Define the schema for password update
 const passwordUpdateSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
@@ -69,6 +78,7 @@ const passwordUpdateSchema = z.object({
 });
 
 type UserFormValues = z.infer<typeof userFormSchema>;
+type UserEditFormValues = z.infer<typeof userEditFormSchema>;
 type PasswordUpdateValues = z.infer<typeof passwordUpdateSchema>;
 
 const Users = () => {
@@ -94,8 +104,8 @@ const Users = () => {
     },
   });
   
-  const editForm = useForm<Omit<UserFormValues, "password">>({
-    resolver: zodResolver(userFormSchema.omit({ password: true })),
+  const editForm = useForm<UserEditFormValues>({
+    resolver: zodResolver(userEditFormSchema),
     defaultValues: {
       name: "",
       fullName: "",
@@ -128,7 +138,15 @@ const Users = () => {
   
   // Handler for adding a new user
   const handleAddUser = async (data: UserFormValues) => {
-    await addUser(data);
+    // All required fields are guaranteed to be present due to Zod validation
+    await addUser({
+      name: data.name,
+      fullName: data.fullName,
+      email: data.email,
+      badgeNumber: data.badgeNumber,
+      role: data.role,
+      password: data.password
+    });
     setIsAddDialogOpen(false);
     addForm.reset();
   };
@@ -147,9 +165,16 @@ const Users = () => {
   };
   
   // Handler for submitting edits
-  const handleEditUser = async (data: Omit<UserFormValues, "password">) => {
+  const handleEditUser = async (data: UserEditFormValues) => {
     if (selectedUser) {
-      await updateUser(selectedUser.id, data);
+      // All required fields are guaranteed to be present due to Zod validation
+      await updateUser(selectedUser.id, {
+        name: data.name,
+        fullName: data.fullName,
+        email: data.email,
+        badgeNumber: data.badgeNumber,
+        role: data.role
+      });
       setIsEditDialogOpen(false);
       setSelectedUser(null);
     }
